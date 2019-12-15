@@ -103,7 +103,7 @@ public class Day15 {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException, InterruptedException {
-		boolean part2 = true;
+		boolean part2 = false;
 		readProgram(origCode, "data/data15.txt");
 
 		Pipe<Long> inputPipe = new Pipe<Long>(2);
@@ -152,9 +152,9 @@ public class Day15 {
 				currentX = nextX;
 				currentY = nextY;
 				map.put(new Pair(currentX, currentY), (int) res);
-				lastDirectionIndex = directionIndex;
-				if (currentX == 0 && currentY == 0)
+				if((currentX == 0 && currentY == 0) || (!part2 && res == 2L))
 					break;
+				lastDirectionIndex = directionIndex;
 			}
 		}
 		thread.interrupt();

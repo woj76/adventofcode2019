@@ -26,11 +26,14 @@ public class Day16 {
 			offset = Integer.parseInt(offsetString);
 		}
 
-		int[] inputArray = new int[input.size() * rep];
+		int[] inputArray = new int[input.size() * rep - offset];
 		int x = 0;
-		for (int i = 0; i < rep; i++)
-			for (Integer v : input)
-				inputArray[x++] = v;
+		int ix = offset % input.size();
+		while (x < inputArray.length) {
+			inputArray[x++] = input.get(ix++);
+			if (ix == input.size())
+				ix = 0;
+		}
 
 		int phase = 0;
 		while (phase < 100) {
@@ -38,12 +41,8 @@ public class Day16 {
 			int[] outputArray = new int[inputArray.length];
 			if (part2) {
 				outputArray[outputArray.length - 1] = inputArray[inputArray.length - 1];
-				for (int o = inputArray.length - 2; o >= offset; o--) {
-					int r = (outputArray[o + 1] + inputArray[o]) % 10;
-					if (r < 0)
-						r = -r;
-					outputArray[o] = r;
-				}
+				for (int o = inputArray.length - 2; o >= 0; o--)
+					outputArray[o] = (outputArray[o + 1] + inputArray[o]) % 10;
 			} else {
 				for (int o = 0; o < inputArray.length; o++) {
 					int r = 0;
@@ -68,7 +67,7 @@ public class Day16 {
 			phase++;
 		}
 		for (int i = 0; i < 8; i++)
-			System.out.print(inputArray[i + offset]);
+			System.out.print(inputArray[i]);
 		System.out.println();
 	}
 }

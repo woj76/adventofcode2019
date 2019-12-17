@@ -113,6 +113,7 @@ public class Day17 {
 
 	public static void main(String[] args) throws FileNotFoundException, InterruptedException {
 		boolean part2 = true;
+		boolean show = true;
 		readProgram(origCode, "data/data17.txt");
 
 		Pipe<Long> inputPipe = new Pipe<Long>(2);
@@ -134,7 +135,7 @@ public class Day17 {
 			if (res == EOF)
 				break;
 			char c = (char) res;
-			if (c == 10) {
+			if (c == '\n') {
 				x = 0;
 				y++;
 			} else {
@@ -145,7 +146,8 @@ public class Day17 {
 				}
 				x++;
 			}
-			System.out.print(c);
+			if (show)
+				System.out.print(c);
 		}
 		if (!part2) {
 			int count = 0;
@@ -164,14 +166,14 @@ public class Day17 {
 			Pair prev = new Pair(-1, -1);
 			char dc = map.get(start);
 			int d = -1;
-			// exclude the one we came from
 			String move = null;
+			int forwardCount = 0;
 			while (true) {
 				Pair[] ns = next.neighbours();
 				if (d != -1 && map.containsKey(ns[d])) {
 					prev = next;
 					next = ns[d];
-					move = "F";
+					forwardCount++;
 				} else {
 					int nc = 0;
 					for (int ni = 0; ni < ns.length; ni++) {
@@ -185,105 +187,81 @@ public class Day17 {
 						break;
 					switch (dc) {
 					case '^':
-						if (d == 1)
-							move = "R";
-						else if (d == 2)
-							move = "RR";
-						else if (d == 3)
-							move = "L";
+						if (d == 1) {
+							move = "R,";
+							dc = '>';
+						} else if (d == 3) {
+							move = "L,";
+							dc = '<';
+						}
 						break;
 					case '>':
-						if (d == 2)
-							move = "R";
-						else if (d == 3)
-							move = "RR";
-						else if (d == 0)
-							move = "L";
+						if (d == 2) {
+							move = "R,";
+							dc = 'v';
+						} else if (d == 0) {
+							move = "L,";
+							dc = '^';
+						}
 						break;
 					case 'v':
-						if (d == 3)
-							move = "R";
-						else if (d == 0)
-							move = "RR";
-						else if (d == 1)
-							move = "L";
+						if (d == 3) {
+							move = "R,";
+							dc = '<';
+						} else if (d == 1) {
+							move = "L,";
+							dc = '>';
+						}
 						break;
 					case '<':
-						if (d == 0)
-							move = "R";
-						else if (d == 1)
-							move = "RR";
-						else if (d == 2)
-							move = "L";
+						if (d == 0) {
+							move = "R,";
+							dc = '^';
+						} else if (d == 2) {
+							move = "L,";
+							dc = 'v';
+						}
 						break;
 					default:
 						break;
 					}
-					switch (d) {
-					case 0:
-						dc = '^';
-						break;
-					case 1:
-						dc = '>';
-						break;
-					case 2:
-						dc = 'v';
-						break;
-					case 3:
-						dc = '<';
-						break;
-					default:
-						break;
+					if (forwardCount > 0) {
+						move = forwardCount + "," + move;
+						forwardCount = 0;
 					}
+					path += move;
 				}
-				path += move;
 			}
-			move = "";
-			while (path.length() > 0) {
-				String oneMove = "";
-				if (path.charAt(0) == 'F') {
-					int c = 0;
-					while (path.length() > 0 && path.charAt(0) == 'F') {
-						path = path.substring(1);
-						c++;
-					}
-					oneMove = "" + c;
-				} else {
-					oneMove = "" + path.charAt(0);
-					path = path.substring(1);
-				}
-				move += oneMove + ",";
-			}
-
+			if (forwardCount > 0)
+				path += "" + forwardCount + ",";
 			String moveCommands = "";
-			char fName = 'A';
+			char functionName = 'A';
 			while (true) {
 				int idx = -1;
 				char fc = 0;
 				do
-					fc = move.charAt(++idx);
-				while (idx < move.length() && (fc != 'L' && fc != 'R'));
+					fc = path.charAt(++idx);
+				while (idx < path.length() && fc != 'L' && fc != 'R');
 				String toSearch = "";
-				for (int r = 0; r < 3; r++) {
-					String ss = move.substring(idx, move.indexOf(',', move.indexOf(',', idx) + 1) + 1);
-					idx += ss.length();
-					toSearch += ss;
-				}
-				int occurrence = occurrence(toSearch, move);
-				while (move.charAt(idx) == 'L' || move.charAt(idx) == 'R') {
-					String ss = move.substring(idx, move.indexOf(',', move.indexOf(',', idx) + 1) + 1);
-					idx += ss.length();
-					if (occurrence(toSearch + ss, move) < occurrence)
+				int occurrence = 0;
+				int r = 0;
+				while (true) {
+					String nextPair = path.substring(idx, path.indexOf(',', path.indexOf(',', idx) + 1) + 1);
+					idx += nextPair.length();
+					r++;
+					if (r > 3 && occurrence(toSearch + nextPair, path) < occurrence)
 						break;
-					toSearch += ss;
+					toSearch += nextPair;
+					if (r == 3)
+						occurrence = occurrence(toSearch, path);
 				}
-				move = move.replaceAll(toSearch, fName + ",");
+				path = path.replaceAll(toSearch, functionName + ",");
 				moveCommands += toSearch.substring(0, toSearch.length() - 1) + "\n";
-				fName++;
-				if (fName == 'D')
+				functionName++;
+				if (functionName == 'D')
 					break;
 			}
-			moveCommands = move.substring(0, move.length() - 1) + "\n" + moveCommands + "n\n";
+			moveCommands = path.substring(0, path.length() - 1) + "\n" + moveCommands + "n\n";
 
 			origCode[0] = 2L;
 			thread = new Thread(() -> {
@@ -303,14 +281,16 @@ public class Day17 {
 					break;
 				if (moveCommands.length() == 0) {
 					if (c < 128) {
-						System.out.print((char) c);
+						if (show)
+							System.out.print((char) c);
 						continue;
 					} else {
 						System.out.println(c);
 					}
 				}
 				if (c == 10L) {
-					System.out.println(lastLine);
+					if (show)
+						System.out.println(lastLine);
 					if (lastLine.equals("Main:")) {
 						send = true;
 					}
@@ -319,7 +299,8 @@ public class Day17 {
 						do {
 							c = moveCommands.charAt(0);
 							inputPipe.put(c);
-							System.out.print((char) c);
+							if (show)
+								System.out.print((char) c);
 							moveCommands = moveCommands.substring(1);
 						} while (c != '\n');
 					}

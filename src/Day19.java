@@ -1,8 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.TreeMap;
 
 public class Day19 {
 
@@ -108,36 +106,37 @@ public class Day19 {
 		int count = 0;
 		while (true) {
 			count = 0;
-			int addX = -1;
-			int addY = -1;
+			int addX = -20;
+			int addY = -20;
 			for (int y = initY; y < initY + step; y++) {
 				for (int x = initX; x < initX + step; x++) {
 					Pipe<Long> inputPipe = new Pipe<Long>(2);
 					Pipe<Long> outputPipe = new Pipe<Long>(2);
 
-					Thread thread = new Thread(() -> {
+					new Thread(() -> {
 						try {
 							runProgram(inputPipe, outputPipe);
 						} catch (InterruptedException ie) {
 						}
-					});
-					thread.start();
+					}).start();
 
 					inputPipe.put((long) x);
 					inputPipe.put((long) y);
 					long res = outputPipe.get();
 					if (res == 1L)
 						count++;
-					if (res == 1L) {
-						if (x == initX && addY == -1)
-							addY = 0;
-						if (y == initY && addX == -1)
-							addX = 0;
-					} else {
-						if (y == initY && addY == 0)
-							addY = step + initX - x;
-						if (x == initX && addX == 0)
-							addX = step + initY - y;
+					if (part2) {
+						if (res == 1L) {
+							if (x == initX && addY < 0)
+								addY = 0;
+							if (y == initY && addX < 0)
+								addX = 0;
+						} else {
+							if (y == initY && addY == 0)
+								addY = step + initX - x;
+							if (x == initX && addX == 0)
+								addX = step + initY - y;
+						}
 					}
 				}
 			}

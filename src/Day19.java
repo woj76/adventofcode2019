@@ -98,19 +98,6 @@ public class Day19 {
 		}
 	}
 
-	private static int occurrence(String pat, String str) {
-		int lastOccurrence = 0;
-		int occurrenceCount = 0;
-		while (true) {
-			lastOccurrence = str.indexOf(pat, lastOccurrence);
-			if (lastOccurrence == -1)
-				break;
-			lastOccurrence += pat.length();
-			occurrenceCount++;
-		}
-		return occurrenceCount;
-	}
-
 	public static void main(String[] args) throws FileNotFoundException, InterruptedException {
 		boolean part2 = true;
 		readProgram(origCode, "data/data19.txt");
